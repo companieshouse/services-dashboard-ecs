@@ -11,7 +11,9 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-ecs": "^3.637.0",
+    "@types/mongodb": "^4.0.6",
     "@types/node": "^22.5.2",
+    "mongodb": "^6.8.0",
     "typescript": "^5.5.4"
   }
 }

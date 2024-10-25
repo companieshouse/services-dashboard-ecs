@@ -47,4 +47,4 @@ async function describeTaskDefinition(taskDefinitionArn: string): Promise<( stri
   return images;
 }
 
-export {listClusters, listTasks, describeTask, describeTaskDefinition}
+export { listClusters, listTasks, describeTask, describeTaskDefinition }

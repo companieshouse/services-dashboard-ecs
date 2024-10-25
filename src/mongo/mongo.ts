@@ -1,20 +1,21 @@
 import { Db, MongoClient, PushOperator } from "mongodb";
 
 import * as config from "../config";
+import {logger, logErr} from "../utils/logger";
 
-let mongoClient: MongoClient;
+
+const mongoClient = new MongoClient(config.MONGO_URI);
+
 let database: Db;
 
 async function init() {
     try {
-        console.log(`connecting to Mongo: ${config.MONGO_URI}`)
-        mongoClient = new MongoClient(config.MONGO_URI);
-
+        logger.info(`connecting to Mongo: ${config.MONGO_URI}`)
         await mongoClient.connect();
         database = mongoClient.db(config.MONGO_DB_NAME);
     }
     catch(error) {
-        console.error("Error connecting to Mongo:", error);
+        logErr(error, "Error connecting to Mongo:");
     }
 }
 
@@ -25,7 +26,7 @@ function close() {
 async function saveToMongo(image: string | undefined, env: string ) {
     try {
        if (image !== undefined) {
-          // console.log(`saving to Mongo: ${image}`)
+          // logger.info(`saving to Mongo: ${image}`)
           // regex to capture the name and version
           const regex = /([^/]+):([^:]+)$/;
           const match = image.match(regex);
@@ -38,7 +39,7 @@ async function saveToMongo(image: string | undefined, env: string ) {
              // Check if a document with the specified name exists
              const existingDocument = await collection.findOne({ name });
              if (!existingDocument) {
-                console.log(`No update perfomed for ECS Service "${name}" as it does not match any doc in the collection.`);
+                logger.info(`No update perfomed for ECS Service "${name}" as it does not match any doc in the collection.`);
                 return;
              }
  
@@ -51,7 +52,7 @@ async function saveToMongo(image: string | undefined, env: string ) {
           }
        }
     }  catch (error) {
-       console.error('Error updating document:', error);
+       logErr(error, 'Error updating document:');
     }
  }
  
@@ -71,9 +72,9 @@ async function saveToMongo(image: string | undefined, env: string ) {
              }
          ]
        );
-       console.log(`Successfully swapped ${tempEnv} -> ${env}: matched ${updateResult.matchedCount} / modified ${updateResult.modifiedCount}`);
+       logger.info(`Successfully swapped ${tempEnv} -> ${env}: matched ${updateResult.matchedCount} / modified ${updateResult.modifiedCount}`);
     } catch (error) {
-       console.error(`Error swapping ${tempEnv} -> ${env}:`, error);
+       logErr(error, `Error swapping ${tempEnv} -> ${env}:`);
     }
  }
 

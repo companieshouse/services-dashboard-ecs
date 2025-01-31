@@ -1,18 +1,20 @@
 
 // import for AWS sdk
 import { ECSClient, ListClustersCommand, ListTasksCommand, DescribeTasksCommand, DescribeTaskDefinitionCommand } from "@aws-sdk/client-ecs";
-import { fromIni } from "@aws-sdk/credential-provider-ini";    // (required on local dev)
+import { fromIni } from "@aws-sdk/credential-provider-ini";    // required on local dev only (not in lambda)
 
+import { isRunningInLambda } from "../utils/envUtils";
 import * as config from "../config";
 
-// Initialise ECS client with profile from AWS credentials
-const client = new ECSClient({
-   credentials: fromIni({ profile: config.AWS_PROFILE }),     //(required on local dev)
-   region: config.REGION                                      //(required on local dev)
-});
 
-// Initialise ECS client with profile from AWS credentials
-// const client = new ECSClient();
+const client = new ECSClient(
+      isRunningInLambda() ?
+         {} :
+         {
+            credentials: fromIni({ profile: config.AWS_PROFILE }),
+            region: config.REGION
+         }
+   );
 
 async function listClusters(): Promise<string[]> {
    const command = new ListClustersCommand({});

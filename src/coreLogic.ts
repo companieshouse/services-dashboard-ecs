@@ -1,14 +1,10 @@
-// import for env vars
-// import dotenv from "dotenv";
-// import dotenvExpand from "dotenv-expand";
-
 import * as config from "./config";
 import {logger, logErr} from "./utils/logger";
 import * as mongo from "./mongo/mongo";
 import * as ecs from "./aws/ecs";
 
 
-async function fetchClusterImages() {   //(required on local dev)
+export async function fetchClusterImages() {   //(required on local dev)
 // export const handler = async (): Promise<void> => {
 
    try {
@@ -50,4 +46,20 @@ async function fetchClusterImages() {   //(required on local dev)
 }
 //;
 
-fetchClusterImages();   //(required on local dev)
+export async function updateSingleTask(image: string) {
+    if (image) {
+        try {
+            await mongo.init();
+            const tempEnv = `temp${config.ENVIRONMENT}`;
+            logger.info(`Image: ${image}`);
+            await mongo.saveToMongo(image, tempEnv);
+            await mongo.swapWithTemp(config.ENVIRONMENT, tempEnv);
+        }
+        catch (error) {
+            logErr(error, "Error fetching ECS data:");
+        }
+        finally {
+            mongo.close();
+        }
+    }
+}

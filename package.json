@@ -3,18 +3,39 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:dev": "npm i && npm run build && nodemon",
+    "start": "node dist/app.js",
+    "prebuild": "rm -rf ./lib",
+    "build": "tsc && cp -r dist/",
+    "test": "jest",
+    "coverage": "jest --coverage --forceExit --passWithNoTests"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "description": "ECS-info-gathering lambda for services dashboard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/companieshouse/services-dashboard-ecs.git"
+  },
+  "author": "companieshouse",
+  "license": "MIT",
+  "homepage": "https://github.com/companieshouse/services-dashboard-ecs#readme",
   "dependencies": {
     "@aws-sdk/client-ecs": "^3.637.0",
     "@companieshouse/structured-logging-node": "^2.0.1",
     "@types/mongodb": "^4.0.6",
-    "@types/node": "^22.5.2",
-    "mongodb": "^6.8.0",
-    "typescript": "^5.5.4"
+    "@types/node": "^22.9.1",
+    "mongodb": "^6.9.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/jest": "^29.5.14",
+    "@types/express": "^4.17.21",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.7",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5"
   }
 }

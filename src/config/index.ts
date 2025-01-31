@@ -1,11 +1,15 @@
-import { getEnvironmentValue } from "../utils/envUtils";
+import { getEnvironmentValue, isRunningInLambda } from "../utils/envUtils";
+import {getParamStore} from "../aws/ssm"
 
 export const APPLICATION_NAME= "services-dashboard-ecs";
 
 // MongoDB configuration
 export const MONGO_PROTOCOL = getEnvironmentValue("MONGO_PROTOCOL", "mongodb");
 export const MONGO_USER     = getEnvironmentValue("MONGO_USER");
-export const MONGO_PASSWORD = getEnvironmentValue("MONGO_PASSWORD");
+export const MONGO_PASSWORD_PARAMSTORE_NAME=getEnvironmentValue("MONGO_PASSWORD_PARAMSTORE_NAME");
+export const MONGO_PASSWORD   = isRunningInLambda() ?
+    getParamStore(MONGO_PASSWORD_PARAMSTORE_NAME):
+    getEnvironmentValue("MONGO_PASSWORD");
 export const MONGO_AUTH       = MONGO_USER ? `${MONGO_USER}:${MONGO_PASSWORD}@` : "";
 export const MONGO_AUTH_CLEAN = MONGO_USER ? `${MONGO_USER}:xxxx@` : "";
 export const MONGO_HOST_AND_PORT = getEnvironmentValue("MONGO_HOST_AND_PORT");

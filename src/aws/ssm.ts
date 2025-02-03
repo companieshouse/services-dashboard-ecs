@@ -17,7 +17,7 @@ export async function getParamStore(paramName:string): Promise<string> {
        logger.error(`retrieving param:[${paramName}] from Parameter Store: [${data.Parameter?.Value}]`);
        return data.Parameter?.Value || '';
    } catch (error: any) {
-        logger.error(`Error retrieving param:[${paramName}] from Parameter Store: ${error.message}`);
+        logger.error(`Error retrieving param:[${paramName}] from Parameter Store: ${(error as Error).message}`);
         throw error;
    }
 }

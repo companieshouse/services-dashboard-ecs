@@ -125,6 +125,13 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   source_arn    = aws_cloudwatch_event_rule.daily_load_all.arn
 }
 
+// Add a VPC endpoint to allow the Lambda function to access ECS
+resource "aws_vpc_endpoint" "ecs" {
+  vpc_id       = data.aws_vpc.vpc_id
+  service_name = "com.amazonaws.${var.aws_region}.ecs"
+  subnet_ids   = local.application_subnet_ids
+  security_group_ids = [aws_security_group.services_dashboard_lambda_sg.id]
+}
 
 resource "aws_security_group" "services_dashboard_lambda_sg" {
   name        = "${local.lambda_function_name}-lambda-sg"

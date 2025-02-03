@@ -8,6 +8,7 @@ const tempEnv = `temp${config.ENVIRONMENT}`;
 
 export async function fetchClusterImages() {
    try {
+        logger.info("fetching Clusters Images ...");
         let images: (string | undefined)[];
         const clusters = await ecs.listClusters();
 

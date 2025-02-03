@@ -4,6 +4,7 @@ import { ECSClient, ListClustersCommand, ListTasksCommand, DescribeTasksCommand,
 import { fromIni } from "@aws-sdk/credential-provider-ini";    // required on local dev only (not in lambda)
 
 import { isRunningInLambda } from "../utils/envUtils";
+import {logger, logErr} from "../utils/logger";
 import * as config from "../config";
 
 
@@ -17,6 +18,7 @@ const client = new ECSClient(
    );
 
 async function listClusters(): Promise<string[]> {
+   logger.info("fetching Clusters List ...");
    const command = new ListClustersCommand({});
    const response = await client.send(command);
    return response.clusterArns || [];

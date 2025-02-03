@@ -110,7 +110,7 @@ resource "aws_cloudwatch_event_target" "lambda_target" {
 resource "aws_lambda_permission" "allow_eventbridge" {
   statement_id  = "AllowEventBridgeToInvokeLambda"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.java_lambda.function_name
+  function_name = aws_lambda_function.node_lambda.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.daily_load_all.arn
 }

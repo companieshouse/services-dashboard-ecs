@@ -1,16 +1,26 @@
 import { Db, MongoClient, PushOperator } from "mongodb";
 
+import { getEnvironmentValue, isRunningInLambda } from "../utils/envUtils";
 import * as config from "../config";
 import {logger, logErr} from "../utils/logger";
+import {getParamStore} from "../aws/ssm"
 
 
-const mongoClient = new MongoClient(config.MONGO_URI);
+let mongoClient: MongoClient;
 
 let database: Db;
 
 async function init() {
    try {
-      logger.info(`connecting to Mongo: ${config.MONGO_URI_CLEAN}`)
+      if (!mongoClient) {
+
+         const mongoPassword = isRunningInLambda() ?
+            await getParamStore(config.MONGO_PASSWORD_PARAMSTORE_NAME):
+            getEnvironmentValue("MONGO_PASSWORD");
+         const mongoUri = `${config.MONGO_PROTOCOL}://${config.MONGO_USER}:${mongoPassword}@${config.MONGO_HOST_AND_PORT}`;
+         logger.info(`connecting to Mongo: ${mongoPassword ? mongoUri.replace(mongoPassword, 'xxxxx') : mongoUri}`);
+         mongoClient = new MongoClient(mongoUri);
+      }
       await mongoClient.connect();
       database = mongoClient.db(config.MONGO_DB_NAME);
    }

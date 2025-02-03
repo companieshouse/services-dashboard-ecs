@@ -21,4 +21,4 @@ export const MONGO_COLLECTION_PROJECTS = getEnvironmentValue("MONGO_COLLECTION_P
 // AWS configuration
 export const AWS_PROFILE = getEnvironmentValue("AWS_PROFILE","dev");
 export const REGION      = getEnvironmentValue("AWS_REGION","eu-west-2");
-export const ENVIRONMENT = getEnvironmentValue("ENS","cidev");
+export const ENVIRONMENT = getEnvironmentValue("ENV","cidev");

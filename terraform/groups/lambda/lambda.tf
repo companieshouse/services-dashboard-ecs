@@ -38,7 +38,7 @@ resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
 # SSM Parameters
 resource "aws_ssm_parameter" "secrets" {
 
-  name  =  "${local.ssm_prefix}/mongo.password.secret"
+  name  = "${local.ssm_prefix}/mongo.password.secret"
   value = local.vault_secrets["mongo.password"]
   type  = "SecureString"
 }
@@ -48,6 +48,12 @@ resource "aws_ssm_parameter" "secrets" {
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name              = "/aws/lambda/${local.lambda_function_name}"
   retention_in_days = var.lambda_logs_retention_days
+}
+
+# Attach the ECS access policy to the Lambda execution role
+resource "aws_iam_role_policy_attachment" "ecs_operations_policy_attachment" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = aws_iam_policy_document.ecs_operations_policy.json
 }
 
 # Create the Lambda function
@@ -68,13 +74,13 @@ resource "aws_lambda_function" "node_lambda" {
 
   environment {
     variables = {
-      MONGO_PROTOCOL  = local.vault_secrets["mongo.protocol"]
-      MONGO_HOST_AND_PORT  = local.vault_secrets["mongo.hostandport"]
-      MONGO_USER  = local.vault_secrets["mongo.user"]
-      MONGO_PASSWORD_PARAMSTORE_NAME  = "${local.ssm_prefix}/mongo.password.secret"
-      MONGO_DB_NAME  = local.vault_secrets["mongo.dbname"]
-      MONGO_COLLECTION_PROJECTS  = local.vault_secrets["mongo.collection.projects"]
-      ENV    = "${var.environment}"
+      MONGO_PROTOCOL                 = local.vault_secrets["mongo.protocol"]
+      MONGO_HOST_AND_PORT            = local.vault_secrets["mongo.hostandport"]
+      MONGO_USER                     = local.vault_secrets["mongo.user"]
+      MONGO_PASSWORD_PARAMSTORE_NAME = "${local.ssm_prefix}/mongo.password.secret"
+      MONGO_DB_NAME                  = local.vault_secrets["mongo.dbname"]
+      MONGO_COLLECTION_PROJECTS      = local.vault_secrets["mongo.collection.projects"]
+      ENV                            = "${var.environment}"
     }
   }
 
@@ -101,9 +107,7 @@ resource "aws_cloudwatch_event_target" "lambda_target" {
   arn  = aws_lambda_function.node_lambda.arn
 
   input = jsonencode({
-    "detail": {
-      "action": "scan"
-    }
+    "action" : "scan"
   })
 }
 # Allow the CloudWatch Event Rule to trigger the Lambda function

@@ -1,6 +1,8 @@
 
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 
+import {logger} from "../utils/logger";
+
 // Create an SSM client
 const ssmClient = new SSMClient({});
 
@@ -13,8 +15,8 @@ export async function getParamStore(paramName:string): Promise<string> {
    try {
        const data = await ssmClient.send(command);
        return data.Parameter?.Value || '';
-   } catch (error) {
-       console.error(`Error retrieving param:[${paramName}] from Parameter Store:`, error);
-       throw error;
+   } catch (error: any) {
+        logger.error(`Error retrieving param:[${paramName}] from Parameter Store: ${error.message}`);
+        throw error;
    }
 }

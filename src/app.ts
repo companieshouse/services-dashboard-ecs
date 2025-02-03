@@ -20,12 +20,12 @@ export const handler: Handler = async (
 
             // Update MongoDB based on ECS event
             await updateSingleTask(updatedVersion);
-            console.log(`Updated ECS service ${serviceName}/version ${updatedVersion}`);
+            logger.info(`Updated ECS service ${serviceName}/version ${updatedVersion}`);
 
-        // } else if (event.source === 'aws.events' && event['detail-type'] === 'Scheduled Event') {
-        } else {
+        } else if (event.source === 'aws.events' && event['detail-type'] === 'Scheduled Event') {
+        // } else {
             const operation = event.operation;   // custom payload
-            if (operation === "scanClusters") {
+            if (operation === "scan") {
                 fetchClusterImages();
             }
         }

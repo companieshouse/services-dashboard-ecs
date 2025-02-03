@@ -21,6 +21,7 @@ async function listClusters(): Promise<string[]> {
    logger.info("fetching Clusters List ...");
    const command = new ListClustersCommand({});
    const response = await client.send(command);
+   logger.info(`got ${JSON.stringify(response, null, 2)}`);
    return response.clusterArns || [];
 }
 

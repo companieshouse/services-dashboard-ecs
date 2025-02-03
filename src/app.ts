@@ -25,6 +25,8 @@ export const handler: Handler = async (
             // } else if (event.source === 'aws.events' && event['detail-type'] === 'Scheduled Event') {
             } else if (event.action === "scan") {
                     fetchClusterImages();
+            } else {
+                logger.info(`Unhandled action: ${event.action}`);
             }
         }
     } catch (error) {

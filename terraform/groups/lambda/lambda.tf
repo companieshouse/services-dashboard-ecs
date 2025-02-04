@@ -64,7 +64,7 @@ resource "aws_iam_role_policy_attachment" "ecs_operations_policy_attachment" {
 
 # Create the Lambda function
 resource "aws_lambda_function" "node_lambda" {
-  depends_on = [aws_cloudwatch_log_group.lambda_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambda_log_group, aws_vpc_endpoint.ecs]
 
   function_name = local.lambda_function_name
   role          = aws_iam_role.lambda_execution_role.arn

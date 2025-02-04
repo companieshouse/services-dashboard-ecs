@@ -73,7 +73,10 @@ data "aws_iam_policy_document" "ecs_operations_policy" {
       "ecs:ListClusters",
       "ecs:ListTasks",
       "ecs:DescribeTasks",
-      "ecs:DescribeTaskDefinition"
+      "ecs:DescribeTaskDefinition",
+      "ecs:DescribeClusters",
+      "ecs:ListContainerInstances",
+      "ecs:DescribeContainerInstances",
     ]
     resources = ["*"]
   }

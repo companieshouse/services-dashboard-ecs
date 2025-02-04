@@ -134,6 +134,9 @@ resource "aws_vpc_endpoint" "ecs" {
   vpc_endpoint_type = "Interface"
   subnet_ids   = local.application_subnet_ids
   security_group_ids = [aws_security_group.services_dashboard_lambda_sg.id]
+  tags = {
+    Name = "connect-lambda-on-this-vpc-to-ecs"
+  }
 }
 
 resource "aws_security_group" "services_dashboard_lambda_sg" {

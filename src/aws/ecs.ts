@@ -10,7 +10,7 @@ import * as config from "../config";
 
 const client = new ECSClient(
       isRunningInLambda() ?
-         {region: config.REGION} :
+         { region: config.REGION } :
          {
             credentials: fromIni({ profile: config.AWS_PROFILE }),
             region: config.REGION

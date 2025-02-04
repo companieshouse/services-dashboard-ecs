@@ -59,8 +59,10 @@ resource "aws_iam_policy" "ecs_operations_policy" {
 # Attach the ECS access policy to the Lambda execution role
 resource "aws_iam_role_policy_attachment" "ecs_operations_policy_attachment" {
   role       = aws_iam_role.lambda_execution_role.name
-  policy_arn = aws_iam_policy.ecs_operations_policy.arn
+  # policy_arn = aws_iam_policy.ecs_operations_policy.arn
+  policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
 }
+
 
 # Create the Lambda function
 resource "aws_lambda_function" "node_lambda" {

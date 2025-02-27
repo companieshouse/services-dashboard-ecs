@@ -7,18 +7,56 @@ import { isRunningInLambda } from "../utils/envUtils";
 import {logger, logErr} from "../utils/logger";
 import * as config from "../config";
 
+import https from "https";
+// const client = new ECSClient(
+//       isRunningInLambda() ?
+//          {  region: config.REGION } :
+//          {
+//             credentials: fromIni({ profile: config.AWS_PROFILE }),
+//             region: config.REGION
+//          }
+//    );
+const client = new ECSClient({
+      region: config.REGION,
+      ...(isRunningInLambda() ? {} : { credentials: fromIni({ profile: config.AWS_PROFILE }) }),
+      logger: console,
+});
 
-const client = new ECSClient(
-      isRunningInLambda() ?
-         { region: config.REGION } :
-         {
-            credentials: fromIni({ profile: config.AWS_PROFILE }),
-            region: config.REGION
-         }
-   );
+function _testInternet() {
+   return new Promise((resolve, reject) => {
+       const req = https.get("https://aws.amazon.com/", (res) => {
+           if (res.statusCode === 200) {
+               console.log("Internet access works!");
+               resolve(true);
+           } else {
+               console.error(`Received status code: ${res.statusCode}`);
+               reject(false);
+           }
+       });
+
+       req.on("error", (err) => {
+           console.error("No internet access:", err);
+           reject(err);
+       });
+
+       req.end();
+   });
+}
+
+
+function _debug() {
+   console.log(`AWS Region: ${config.REGION}`);
+   try {
+      console.log("testing internet access...");
+      _testInternet();
+  } catch (error) {
+      console.error("No internet access:", error);
+  }
+}
 
 async function listClusters(): Promise<string[]> {
    logger.info("fetching Clusters List ...");
+   _debug();
    try {
        const command = new ListClustersCommand({});
        logger.info("----presend");

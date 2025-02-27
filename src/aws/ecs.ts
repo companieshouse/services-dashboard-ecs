@@ -43,12 +43,28 @@ function _testInternet() {
    });
 }
 
+async function _testAWSAPI() {
+   return new Promise((resolve, reject) => {
+       const req = https.get("https://ecs.eu-west-2.amazonaws.com/", (res) => {
+           console.log(`AWS API status code: ${res.statusCode}`);
+           resolve(true);
+       });
 
-function _debug() {
+       req.on("error", (err) => {
+           console.error("AWS API unreachable:", err);
+           reject(err);
+       });
+
+       req.end();
+   });
+}
+
+async function _debug() {
    console.log(`AWS Region: ${config.REGION}`);
    try {
       console.log("testing internet access...");
-      _testInternet();
+      await _testInternet();
+      await _testAWSAPI();
   } catch (error) {
       console.error("No internet access:", error);
   }
@@ -56,7 +72,7 @@ function _debug() {
 
 async function listClusters(): Promise<string[]> {
    logger.info("fetching Clusters List ...");
-   _debug();
+   await _debug();
    try {
        const command = new ListClustersCommand({});
        logger.info("----presend");

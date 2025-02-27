@@ -25,18 +25,19 @@ const client = new ECSClient({
 function _testInternet() {
    return new Promise((resolve, reject) => {
        const req = https.get("https://aws.amazon.com/", (res) => {
-           if (res.statusCode === 200) {
-               console.log("Internet access works!");
-               resolve(true);
-           } else {
-               console.error(`Received status code: ${res.statusCode}`);
-               reject(false);
-           }
+           console.log(`Internet test status: ${res.statusCode}`);
+           resolve(true);
        });
 
        req.on("error", (err) => {
            console.error("No internet access:", err);
            reject(err);
+       });
+
+       req.setTimeout(5000, () => {
+           console.error("Internet test timeout: No response");
+           req.destroy();
+           reject(new Error("Timeout"));
        });
 
        req.end();

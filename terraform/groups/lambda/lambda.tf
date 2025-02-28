@@ -70,7 +70,7 @@ resource "aws_lambda_function" "python_test" {
   role          = aws_iam_role.lambda_execution_role.arn
 
   s3_bucket = var.release_bucket_name
-  s3_key    = "services-dashboard-ecs/python_test_ecs.zip"
+  s3_key    = "services-dashboard-ecs/python_test_ecs.2.zip"
 
   handler = "python_test_ecs.lambda_handler"
   runtime = "python3.8"

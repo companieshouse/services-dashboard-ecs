@@ -63,17 +63,35 @@ resource "aws_iam_role_policy_attachment" "ecs_operations_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
 }
 
-resource "aws_lambda_function" "node_test" {
+resource "aws_lambda_function" "node_16_test" {
   depends_on = [aws_cloudwatch_log_group.lambda_log_group, aws_vpc_endpoint.ecs]
 
-  function_name = "node_test_ecs"
+  function_name = "node_16_test_ecs"
   role          = aws_iam_role.lambda_execution_role.arn
 
   s3_bucket = var.release_bucket_name
-  s3_key    = "services-dashboard-ecs/node_test_ecs.1.zip"
+  s3_key    = "services-dashboard-ecs/node_16_test_ecs.1.zip"
 
-  handler = "node_test_ecs.lambdaHandler"
-  runtime = "nodejs18.x"
+  handler = "node_16_test_ecs.lambdaHandler"
+  runtime = "nodejs16.x"
+  memory_size     = 128
+  timeout         = 10
+  vpc_config {
+    subnet_ids         = local.application_subnet_ids
+    security_group_ids = [aws_security_group.services_dashboard_lambda_sg.id]
+  }
+}
+resource "aws_lambda_function" "node_20_test" {
+  depends_on = [aws_cloudwatch_log_group.lambda_log_group, aws_vpc_endpoint.ecs]
+
+  function_name = "node_20_test_ecs"
+  role          = aws_iam_role.lambda_execution_role.arn
+
+  s3_bucket = var.release_bucket_name
+  s3_key    = "services-dashboard-ecs/node_20_test_ecs.1.zip"
+
+  handler = "node_20_test_ecs.lambdaHandler"
+  runtime = "nodejs20.x"
   memory_size     = 128
   timeout         = 10
   vpc_config {

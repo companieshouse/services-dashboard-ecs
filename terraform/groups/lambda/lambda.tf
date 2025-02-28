@@ -72,7 +72,7 @@ resource "aws_lambda_function" "python_test" {
   s3_bucket = var.release_bucket_name
   s3_key    = "services-dashboard-ecs/python_test_ecs.zip"
 
-  handler = "lambda_function.lambda_handler"
+  handler = "python_test_ecs.lambda_handler"
   runtime = "python3.8"
 
   vpc_config {

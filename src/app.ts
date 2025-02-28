@@ -1,8 +1,8 @@
 import { Handler, Context } from 'aws-lambda';
 
-import {fetchClusterImages, updateSingleTask} from "./coreLogic";
-import {logger, logErr} from "./utils/logger";
-import { isRunningInLambda } from "./utils/envUtils";
+import {fetchClusterImages, updateSingleTask} from "./coreLogic.js";
+import {logger, logErr} from "./utils/logger.js";
+import { isRunningInLambda } from "./utils/envUtils.js";
 
 // Handler function for Lambda
 export const handler: Handler = async (

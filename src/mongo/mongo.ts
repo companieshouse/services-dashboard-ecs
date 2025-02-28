@@ -1,9 +1,9 @@
 import { Db, MongoClient, PushOperator } from "mongodb";
 
-import { getEnvironmentValue, isRunningInLambda } from "../utils/envUtils";
-import * as config from "../config";
-import {logger, logErr} from "../utils/logger";
-import {getParamStore} from "../aws/ssm"
+import { getEnvironmentValue, isRunningInLambda } from "../utils/envUtils.js";
+import * as config from "../config/index.js";
+import {logger, logErr} from "../utils/logger.js";
+import {getParamStore} from "../aws/ssm.js"
 
 
 let mongoClient: MongoClient;

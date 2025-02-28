@@ -1,7 +1,7 @@
 
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 
-import {logger} from "../utils/logger";
+import {logger} from "../utils/logger.js";
 
 // Create an SSM client
 const ssmClient = new SSMClient({});

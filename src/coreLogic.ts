@@ -1,7 +1,7 @@
-import * as config from "./config";
-import {logger, logErr} from "./utils/logger";
-import * as mongo from "./mongo/mongo";
-import * as ecs from "./aws/ecs";
+import * as config from "./config/index.js";
+import {logger, logErr} from "./utils/logger.js";
+import * as mongo from "./mongo/mongo.js";
+import * as ecs from "./aws/ecs.js";
 
 // temp environment to store the new data
 const tempEnv = `temp${config.ENVIRONMENT}`;

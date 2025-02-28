@@ -3,9 +3,9 @@
 import { ECSClient, ListClustersCommand, ListTasksCommand, DescribeTasksCommand, DescribeTaskDefinitionCommand } from "@aws-sdk/client-ecs";
 import { fromIni } from "@aws-sdk/credential-provider-ini";    // required on local dev only (not in lambda)
 
-import { isRunningInLambda } from "../utils/envUtils";
-import {logger, logErr} from "../utils/logger";
-import * as config from "../config";
+import { isRunningInLambda } from "../utils/envUtils.js";
+import {logger, logErr} from "../utils/logger.js";
+import * as config from "../config/index.js";
 
 import https from "https";
 

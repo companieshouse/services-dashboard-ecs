@@ -63,6 +63,23 @@ resource "aws_iam_role_policy_attachment" "ecs_operations_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
 }
 
+resource "aws_lambda_function" "python_test" {
+  depends_on = [aws_cloudwatch_log_group.lambda_log_group, aws_vpc_endpoint.ecs]
+
+  function_name = "python_test_ecs"
+  role          = aws_iam_role.lambda_execution_role.arn
+
+  s3_bucket = var.release_bucket_name
+  s3_key    = "python_test_ecs.zip"
+
+  handler = "lambda_function.lambda_handler"
+  runtime = "python3.8"
+
+  vpc_config {
+    subnet_ids         = local.application_subnet_ids
+    security_group_ids = [aws_security_group.services_dashboard_lambda_sg.id]
+  }
+}
 
 # Create the Lambda function
 resource "aws_lambda_function" "node_lambda" {

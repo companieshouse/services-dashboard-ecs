@@ -88,7 +88,7 @@ resource "aws_lambda_function" "node_20_test" {
   role          = aws_iam_role.lambda_execution_role.arn
 
   s3_bucket = var.release_bucket_name
-  s3_key    = "services-dashboard-ecs/node_20_test_ecs.2.zip"
+  s3_key    = "services-dashboard-ecs/node_20_test_ecs.3.zip"
 
   handler = "node_20_test_ecs.lambdaHandler"
   runtime = "nodejs20.x"

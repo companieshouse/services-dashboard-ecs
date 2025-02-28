@@ -44,6 +44,28 @@ function _testInternet() {
    });
 }
 
+
+async function testECSConnection(): Promise<number> {
+   return new Promise((resolve, reject) => {
+       const options = {
+           hostname: "ecs.eu-west-2.amazonaws.com",
+           port: 443,
+           path: "/",
+           method: "GET",
+       };
+
+       const req = https.request(options, (res) => {
+           resolve(res.statusCode || 500); // Default to 500 if status code is undefined
+       });
+
+       req.on("error", (error) => {
+           reject(`Error connecting to ECS: ${error.message}`);
+       });
+
+       req.end();
+   });
+}
+
 async function _testAWSAPI() {
    return new Promise((resolve, reject) => {
        const req = https.get("https://ecs.eu-west-2.amazonaws.com/", (res) => {
@@ -72,17 +94,25 @@ async function _debug() {
 }
 
 async function listClusters(): Promise<string[]> {
-   logger.info("fetching Clusters List ...");
-   await _debug();
+   // logger.info("fetching Clusters List ...");
+   console.log("1");
    try {
-       const command = new ListClustersCommand({});
-       logger.info("----presend");
-       const response = await client.send(command);
-       logger.info(`got ${JSON.stringify(response, null, 2)}`);
-       return response.clusterArns || [];
+      console.log("1.1");
+      const status = await testECSConnection();
+      console.log(`Status Code: ${status}`);
+      await _debug();
+
+      const command = new ListClustersCommand({});
+      console.log("2");
+   //  logger.info("----presend");
+      const response = await client.send(command);
+      // logger.info(`got ${JSON.stringify(response, null, 2)}`);
+      console.log(`got ${JSON.stringify(response, null, 2)}`);
+      return response.clusterArns || [];
    } catch (error) {
-       logger.error(`Error fetching clusters: ${(error as Error).message}`);
-       throw error;
+   //  logger.error(`Error fetching clusters: ${(error as Error).message}`);
+      console.log("3");
+      throw error;
    }
 }
 

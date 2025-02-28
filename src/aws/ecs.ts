@@ -8,18 +8,11 @@ import {logger, logErr} from "../utils/logger";
 import * as config from "../config";
 
 import https from "https";
-// const client = new ECSClient(
-//       isRunningInLambda() ?
-//          {  region: config.REGION } :
-//          {
-//             credentials: fromIni({ profile: config.AWS_PROFILE }),
-//             region: config.REGION
-//          }
-//    );
+
 const client = new ECSClient({
       region: config.REGION,
-      ...(isRunningInLambda() ? {} : { credentials: fromIni({ profile: config.AWS_PROFILE }) }),
-      logger: console,
+      ...(isRunningInLambda() ? {} : { credentials: fromIni({ profile: config.AWS_PROFILE }) })
+      // , logger: console,
 });
 
 function _testInternet() {

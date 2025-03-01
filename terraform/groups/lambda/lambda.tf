@@ -88,12 +88,23 @@ resource "aws_lambda_function" "node_20_test" {
   role          = aws_iam_role.lambda_execution_role.arn
 
   s3_bucket = var.release_bucket_name
-  s3_key    = "services-dashboard-ecs/node_20_test_ecs.6.zip"
+  s3_key    = "services-dashboard-ecs/node_20_test_ecs.7.zip"
 
   handler = "node_20_test_ecs.lambdaHandler"
   runtime = "nodejs20.x"
   memory_size     = 128
   timeout         = 10
+  environment {
+    variables = {
+      MONGO_PROTOCOL                 = local.vault_secrets["mongo.protocol"]
+      MONGO_HOST_AND_PORT            = local.vault_secrets["mongo.hostandport"]
+      MONGO_USER                     = local.vault_secrets["mongo.user"]
+      MONGO_PASSWORD_PARAMSTORE_NAME = "${local.ssm_prefix}/mongo.password.secret"
+      MONGO_DB_NAME                  = local.vault_secrets["mongo.dbname"]
+      MONGO_COLLECTION_PROJECTS      = local.vault_secrets["mongo.collection.projects"]
+      ENV                            = "${var.environment}"
+    }
+  }
   vpc_config {
     subnet_ids         = local.application_subnet_ids
     security_group_ids = [aws_security_group.services_dashboard_lambda_sg.id]

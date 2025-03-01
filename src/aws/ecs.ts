@@ -7,8 +7,6 @@ import { isRunningInLambda } from "../utils/envUtils.js";
 import {logger, logErr} from "../utils/logger.js";
 import * as config from "../config/index.js";
 
-import https from "https";
-
 const client = new ECSClient({
       region: config.REGION,
       ...(isRunningInLambda() ? {} : { credentials: fromIni({ profile: config.AWS_PROFILE }) })
@@ -18,7 +16,6 @@ async function listClusters(): Promise<string[]> {
    logger.info("fetching Clusters List ...");
    try {
       const command = new ListClustersCommand({});
-      logger.info("----presend");
       const response = await client.send(command);
       logger.info(`got ${JSON.stringify(response, null, 2)}`);
       return response.clusterArns || [];

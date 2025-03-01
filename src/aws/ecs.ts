@@ -87,8 +87,7 @@ async function _debug() {
 }
 
 async function listClusters(): Promise<string[]> {
-   // logger.info("fetching Clusters List ...");
-   console.log("1");
+   logger.info("fetching Clusters List ...");
    try {
       console.log("1.1");
       const status = await testECSConnection();
@@ -96,15 +95,13 @@ async function listClusters(): Promise<string[]> {
       await _debug();
 
       const command = new ListClustersCommand({});
-      console.log("2");
-   //  logger.info("----presend");
+    logger.info("----presend");
       const response = await client.send(command);
       // logger.info(`got ${JSON.stringify(response, null, 2)}`);
       console.log(`got ${JSON.stringify(response, null, 2)}`);
       return response.clusterArns || [];
    } catch (error) {
-   //  logger.error(`Error fetching clusters: ${(error as Error).message}`);
-      console.log("3");
+    logger.error(`Error fetching clusters: ${(error as Error).message}`);
       throw error;
    }
 }

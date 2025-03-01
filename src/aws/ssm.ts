@@ -14,7 +14,7 @@ export async function getParamStore(paramName:string): Promise<string> {
 
    try {
        const data = await ssmClient.send(command);
-       logger.error(`retrieving param:[${paramName}] from Parameter Store: [${data.Parameter?.Value}]`);
+       logger.info(`retrieving param:[${paramName}] from Parameter Store`);
        return data.Parameter?.Value || '';
    } catch (error: any) {
         logger.error(`Error retrieving param:[${paramName}] from Parameter Store: ${(error as Error).message}`);

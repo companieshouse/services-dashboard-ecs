@@ -39,7 +39,7 @@ export async function fetchClusterImages() {
         }
         await mongo.swapWithTemp(config.ENVIRONMENT, tempEnv);
     } catch (error) {
-        logErr(error, "Error fetching ECS data:");
+        logErr(error, "Error fetching ECS Cluster data:");
     } finally {
         mongo.close();
     }
@@ -54,7 +54,7 @@ export async function updateSingleTask(image: string) {
             await mongo.swapWithTemp(config.ENVIRONMENT, tempEnv);
         }
         catch (error) {
-            logErr(error, "Error fetching ECS data:");
+            logErr(error, "Error fetching ECS Task data:");
         }
         finally {
             mongo.close();

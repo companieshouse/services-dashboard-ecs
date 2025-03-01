@@ -12,93 +12,15 @@ import https from "https";
 const client = new ECSClient({
       region: config.REGION,
       ...(isRunningInLambda() ? {} : { credentials: fromIni({ profile: config.AWS_PROFILE }) })
-      // , logger: console,
 });
-
-function _testInternet() {
-   return new Promise((resolve, reject) => {
-       const req = https.get("https://aws.amazon.com/", (res) => {
-           console.log(`Internet test status: ${res.statusCode}`);
-           resolve(true);
-       });
-
-       req.on("error", (err) => {
-           console.error("No internet access:", err);
-           reject(err);
-       });
-
-       req.setTimeout(5000, () => {
-           console.error("Internet test timeout: No response");
-           req.destroy();
-           reject(new Error("Timeout"));
-       });
-
-       req.end();
-   });
-}
-
-
-async function testECSConnection(): Promise<number> {
-   return new Promise((resolve, reject) => {
-       const options = {
-           hostname: "ecs.eu-west-2.amazonaws.com",
-           port: 443,
-           path: "/",
-           method: "GET",
-       };
-
-       const req = https.request(options, (res) => {
-           resolve(res.statusCode || 500); // Default to 500 if status code is undefined
-       });
-
-       req.on("error", (error) => {
-           reject(`Error connecting to ECS: ${error.message}`);
-       });
-
-       req.end();
-   });
-}
-
-async function _testAWSAPI() {
-   return new Promise((resolve, reject) => {
-       const req = https.get("https://ecs.eu-west-2.amazonaws.com/", (res) => {
-           console.log(`AWS API status code: ${res.statusCode}`);
-           resolve(true);
-       });
-
-       req.on("error", (err) => {
-           console.error("AWS API unreachable:", err);
-           reject(err);
-       });
-
-       req.end();
-   });
-}
-
-async function _debug() {
-   console.log(`AWS Region: ${config.REGION}`);
-   try {
-      console.log("testing internet access...");
-      await _testInternet();
-      await _testAWSAPI();
-  } catch (error) {
-      console.error("No internet access:", error);
-  }
-}
 
 async function listClusters(): Promise<string[]> {
    logger.info("fetching Clusters List ...");
    try {
-      console.log("1.1");
-      const status = await testECSConnection();
-      console.log(`Status Code: ${status}`);
-      await _debug();
-
       const command = new ListClustersCommand({});
-    logger.info("----presend");
+      logger.info("----presend");
       const response = await client.send(command);
-      // logger.info(`got ${JSON.stringify(response, null, 2)}`);
-      console.log(`got ${JSON.stringify(response, null, 2)}`);
+      logger.info(`got ${JSON.stringify(response, null, 2)}`);
       return response.clusterArns || [];
    } catch (error) {
     logger.error(`Error fetching clusters: ${(error as Error).message}`);

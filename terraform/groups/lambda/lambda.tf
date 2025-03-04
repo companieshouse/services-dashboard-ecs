@@ -42,13 +42,13 @@ resource "aws_ssm_parameter" "secrets" {
   # Terraform's aws_ssm_parameter resource does not support overwriting existing values
   # so we opt to create only if not already present
   count = length(data.aws_ssm_parameter.secret_existing.id) == 0 ? 1 : 0
-  name  = "${local.ssm_prefix}/${ssm_mongo_secret}"
+  name  = "${local.ssm_prefix}/${local.ssm_mongo_secret}"
   value = local.vault_secrets["mongo.password"]
   type  = "SecureString"
 
 }
 data "aws_ssm_parameter" "secret_existing" {
-  name = "${local.ssm_prefix}/${ssm_mongo_secret}"
+  name = "${local.ssm_prefix}/${local.ssm_mongo_secret}"
 }
 
 # CloudWatch Log Groups

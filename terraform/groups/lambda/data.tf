@@ -1,9 +1,9 @@
 data "vault_generic_secret" "stack_secrets" {
-  path = "applications/${var.vault_stack_path}"
+  path = local.stack_secrets_path
 }
 
 data "vault_generic_secret" "service_secrets" {
-  path = "applications/${var.vault_service_path}"
+  path = local.service_secrets_path
 }
 
 # Policy to attach to the IAM role for the Lambda function

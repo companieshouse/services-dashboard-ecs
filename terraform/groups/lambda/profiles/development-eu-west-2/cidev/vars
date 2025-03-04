@@ -1,4 +1,2 @@
 aws_profile            = "development-eu-west-2"
 environment            = "cidev"
-vault_stack_path       = "development-eu-west-2/randd/rand-stack"
-vault_service_path     = "services-dashboard-eu-west-2"

@@ -62,17 +62,3 @@ variable "lambda_logs_retention_days" {
   description = "The number of days to retain Lambda logs in CloudWatch"
   default     = 7
 }
-
-
-
-variable "vault_stack_path" {
-  type        = string
-  description = "Vault stack path."
-  default     = "development-eu-west-2/randd/rand-stack"
-}
-
-variable "vault_service_path" {
-  type        = string
-  description = "Vault service path."
-  default     = "services-dashboard-eu-west-2"
-}

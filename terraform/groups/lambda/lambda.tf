@@ -58,7 +58,7 @@ resource "aws_iam_policy" "ecs_operations_policy" {
 
 # Attach the ECS access policy to the Lambda execution role
 resource "aws_iam_role_policy_attachment" "ecs_operations_policy_attachment" {
-  role       = aws_iam_role.lambda_execution_role.name
+  role = aws_iam_role.lambda_execution_role.name
   # policy_arn = aws_iam_policy.ecs_operations_policy.arn
   policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
 }
@@ -128,10 +128,10 @@ resource "aws_lambda_permission" "allow_eventbridge" {
 
 // Add a VPC endpoint to allow the Lambda function to access ECS
 resource "aws_vpc_endpoint" "ecs" {
-  vpc_id       = data.aws_vpc.vpc.id
-  service_name = "com.amazonaws.${var.aws_region}.ecs"
-  vpc_endpoint_type = "Interface"
-  subnet_ids   = local.application_subnet_ids
+  vpc_id             = data.aws_vpc.vpc.id
+  service_name       = "com.amazonaws.${var.aws_region}.ecs"
+  vpc_endpoint_type  = "Interface"
+  subnet_ids         = local.application_subnet_ids
   security_group_ids = [aws_security_group.services_dashboard_lambda_sg.id]
   tags = {
     Name = "connect-lambda-on-this-vpc-to-ecs"

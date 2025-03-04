@@ -39,24 +39,16 @@ resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
 
 
 resource "aws_ssm_parameter" "secrets" {
-
-  name  = "${local.ssm_prefix}/mongo.password.secret"
-  value = local.vault_secrets["mongo.password"]
-  type  = "SecureString"
   # Terraform's aws_ssm_parameter resource does not support overwriting existing values
   # so we opt to create only if not already present
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-resource "aws_ssm_parameter" "secrets2" {
-
-  name  = "${local.ssm_prefix}/mongo.password.secret2"
+  count = length(data.aws_ssm_parameter.secret_existing.id) == 0 ? 1 : 0
+  name  = "${local.ssm_prefix}/${ssm_mongo_secret}"
   value = local.vault_secrets["mongo.password"]
   type  = "SecureString"
-  lifecycle {
-    ignore_changes = [value]
-  }
+
+}
+data "aws_ssm_parameter" "secret_existing" {
+  name = "${local.ssm_prefix}/${ssm_mongo_secret}"
 }
 
 # CloudWatch Log Groups

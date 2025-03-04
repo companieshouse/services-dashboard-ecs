@@ -6,8 +6,8 @@ export const APPLICATION_NAME= "services-dashboard-ecs";
 export const MONGO_PROTOCOL = getEnvironmentValue("MONGO_PROTOCOL", "mongodb");
 export const MONGO_USER     = getEnvironmentValue("MONGO_USER");
 export const MONGO_PASSWORD_PARAMSTORE_NAME=getEnvironmentValue("MONGO_PASSWORD_PARAMSTORE_NAME");
-export const MONGO_HOST_AND_PORT = getEnvironmentValue("MONGO_HOSTANDPORT");
-export const MONGO_DB_NAME = getEnvironmentValue("MONGO_DBNAME");
+export const MONGO_HOST_AND_PORT = getEnvironmentValue("MONGO_HOST_AND_PORT");
+export const MONGO_DB_NAME = getEnvironmentValue("MONGO_DB_NAME");
 export const MONGO_COLLECTION_PROJECTS = getEnvironmentValue("MONGO_COLLECTION_PROJECTS","projects");
 
 // AWS configuration

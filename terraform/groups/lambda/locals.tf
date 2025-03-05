@@ -5,7 +5,7 @@ locals {
   lambda_function_name = "${local.service_name}-${var.environment}"
   stack_secrets_path   = "applications/${var.aws_profile}/${var.environment}/${local.stack_name}"
   service_secrets_path = "${local.stack_secrets_path}/services-dashboard"
-  ssm_prefix           = "${local.service_name}"
+  ssm_prefix           = "/${local.service_name}"
 
   vpc_name                   = local.vault_secrets["vpc_name"]
   application_subnet_ids     = data.aws_subnets.application.ids

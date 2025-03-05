@@ -37,18 +37,12 @@ resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
 
 # SSM Parameters
 
-
 resource "aws_ssm_parameter" "secrets" {
-  # Terraform's aws_ssm_parameter resource does not support overwriting existing values
-  # so we opt to create only if not already present
-  count = length(data.aws_ssm_parameter.secret_existing.id) == 0 ? 1 : 0
-  name  = "${local.ssm_prefix}/${local.ssm_mongo_secret}"
-  value = local.vault_secrets["mongo.password"]
-  type  = "SecureString"
+  for_each = local.ssm_secret_keys # Use the cleared/nonsensitive map to loop over the keys
 
-}
-data "aws_ssm_parameter" "secret_existing" {
-  name = "${local.ssm_prefix}/${local.ssm_mongo_secret}"
+  name  = "${local.ssm_prefix}/${each.key}"
+  value = local.vault_secrets[each.key]
+  type  = "SecureString"
 }
 
 # CloudWatch Log Groups
@@ -91,7 +85,7 @@ resource "aws_lambda_function" "node_lambda" {
       MONGO_PROTOCOL                 = local.vault_secrets["mongo_protocol"]
       MONGO_HOST_AND_PORT            = local.vault_secrets["mongo_hostandport"]
       MONGO_USER                     = local.vault_secrets["mongo_user"]
-      MONGO_PASSWORD_PARAMSTORE_NAME = "${local.ssm_prefix}/${local.ssm_mongo_secret}"
+      MONGO_PASSWORD_PARAMSTORE_NAME = "${local.ssm_prefix}/mongo_password"
       MONGO_DB_NAME                  = local.vault_secrets["mongo_dbname"]
       MONGO_COLLECTION_PROJECTS      = local.vault_secrets["mongo_collection_projects"]
       ENV                            = "${var.environment}"

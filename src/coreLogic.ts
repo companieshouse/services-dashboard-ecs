@@ -37,7 +37,7 @@ export async function fetchClusterImages() {
                 }
             }
         }
-        await mongo.swapWithTemp(config.ENVIRONMENT, tempEnv);
+        // await mongo.swapWithTemp(config.ENVIRONMENT, tempEnv);
     } catch (error) {
         logErr(error, "Error fetching ECS Cluster data:");
     } finally {

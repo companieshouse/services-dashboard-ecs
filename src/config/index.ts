@@ -5,10 +5,18 @@ export const APPLICATION_NAME= "services-dashboard-ecs";
 // MongoDB configuration
 export const MONGO_PROTOCOL = getEnvironmentValue("MONGO_PROTOCOL", "mongodb");
 export const MONGO_USER     = getEnvironmentValue("MONGO_USER");
-export const MONGO_PASSWORD_PARAMSTORE_NAME=getEnvironmentValue("MONGO_PASSWORD_PARAMSTORE_NAME");
+export const MONGO_PASSWORD_PARAMSTORE_NAME = getEnvironmentValue("MONGO_PASSWORD_PARAMSTORE_NAME");
 export const MONGO_HOST_AND_PORT = getEnvironmentValue("MONGO_HOST_AND_PORT");
 export const MONGO_DB_NAME = getEnvironmentValue("MONGO_DB_NAME");
 export const MONGO_COLLECTION_PROJECTS = getEnvironmentValue("MONGO_COLLECTION_PROJECTS","projects");
+
+// GITHUB configuration
+export const GH_API  = "https://api.github.com";
+export const GH_ORG  = "companieshouse";
+export const GH_REPO_BASE = `${GH_API}/repos/${GH_ORG}`;
+export const GH_HEADER_ACCEPT = "application/vnd.github.v3+json"
+export const GH_TOKEN_PARAMSTORE_NAME = getEnvironmentValue("GH_TOKEN_PARAMSTORE_NAME");
+export const GH_TIMEOUT_MS = 5000;
 
 // AWS configuration
 export const AWS_PROFILE = getEnvironmentValue("AWS_PROFILE","dev");

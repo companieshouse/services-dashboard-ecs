@@ -4,7 +4,7 @@ import { getEnvironmentValue, isRunningInLambda } from "../utils/envUtils.js";
 import * as config from "../config/index.js";
 import {logger, logErr} from "../utils/logger.js";
 import {getParamStore} from "../aws/ssm.js"
-
+import {getReleaseDate} from "../git/git.js";
 
 let mongoClient: MongoClient;
 
@@ -53,11 +53,18 @@ async function saveToMongo(image: string | undefined, env: string ) {
                logger.info(`No update perfomed for ECS Service "${name}" as it does not match any doc in the collection.`);
                return;
             }
-
+            let date: string|null = null;
+            try {
+               date = await getReleaseDate(name, version);
+               logger.info(`Version ${version} was released on: ${date}`);
+            } catch (error) {
+               logErr(error, "Error getting GitHub Release info:");
+            }
             // Create the update object
             const updateQuery = {
-               $addToSet: { [`ecs.${env}`]: version }  // $addToSet ensures that the value is added only if it doesn't exist
+               $addToSet: { [`ecs.${env}`]: { version, date: date ? date : "" } }  // $addToSet ensures that the value is added only if it doesn't exist
             };
+
             // If both "ecs" or its subfield "ecs.type" don't exist --> Mongo creates them
             await collection.updateOne({ name }, updateQuery);
          }

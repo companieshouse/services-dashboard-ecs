@@ -81,17 +81,27 @@ async function swapWithTemp (env: string, tempEnv: string ) {
    try {
       const collection = database.collection(config.MONGO_COLLECTION_PROJECTS);
       const updateResult = await collection.updateMany(
-         { [`ecs.${tempEnv}`]: { $exists: true } },  // find docs with ecs.temp
+         { [`ecs.${tempEnv}`]: { $exists: true } },  // Find docs with ecs.tempEnv
          [
             {
                $set: {
-                  [`ecs.${env}`]: `$ecs.${tempEnv}`  // Overwrite ecs.env with the value of ecs.tempEnv
+                  [`ecs.${env}`]: `$ecs.${tempEnv}`  // Overwrite ecs.env with ecs.tempEnv
                }
             },
             {
-               $unset: [`ecs.${tempEnv}`]  // Remove the ecs.tempEnv field
+               $unset: [`ecs.${tempEnv}`]  // Remove ecs.tempEnv field
+            },
+            {
+               $set: {
+                  [`ecs.${env}`]: {
+                     $sortArray: {
+                        input: `$ecs.${env}`,
+                        sortBy: { version: 1 }  // Sort the array by "version" in ascending order
+                     }
+                  }
+               }
             }
-      ]
+         ]
       );
       logger.info(`Successfully swapped ${tempEnv} -> ${env}: matched ${updateResult.matchedCount} / modified ${updateResult.modifiedCount}`);
    } catch (error) {

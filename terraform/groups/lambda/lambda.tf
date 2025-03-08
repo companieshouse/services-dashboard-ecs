@@ -86,6 +86,7 @@ resource "aws_lambda_function" "node_lambda" {
       MONGO_HOST_AND_PORT            = local.vault_secrets["mongo_hostandport"]
       MONGO_USER                     = local.vault_secrets["mongo_user"]
       MONGO_PASSWORD_PARAMSTORE_NAME = "${local.ssm_prefix}/mongo_password"
+      GH_TOKEN_PARAMSTORE_NAME       = "${local.ssm_prefix}/gh_token"
       MONGO_DB_NAME                  = local.vault_secrets["mongo_dbname"]
       MONGO_COLLECTION_PROJECTS      = local.vault_secrets["mongo_collection_projects"]
       ENV                            = "${var.environment}"

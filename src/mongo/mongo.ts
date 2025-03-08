@@ -62,11 +62,14 @@ async function saveToMongo(image: string | undefined, env: string ) {
             }
             // Create the update object
             const updateQuery = {
-               $addToSet: { [`ecs.${env}`]: { version, date: date ? date : "" } }  // $addToSet ensures that the value is added only if it doesn't exist
+               $addToSet: { [`ecs.${env}`]: { version, date: date ? new Date(date) : null } }
             };
 
             // If both "ecs" or its subfield "ecs.type" don't exist --> Mongo creates them
-            await collection.updateOne({ name }, updateQuery);
+            await collection.updateOne(
+               { name, [`ecs.${env}.version`]: { $ne: version } }, // Ensure no object with the same version exists
+               updateQuery
+            );
          }
       }
    }  catch (error) {

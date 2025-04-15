@@ -10,6 +10,10 @@ let mongoClient: MongoClient;
 
 let database: Db;
 
+// cache release dates already retrieved from GitHub (ex. eric is looked-up many times)
+const cacheReleaseDates: Record<string, string | null> = {};
+
+
 async function init() {
    try {
       if (!mongoClient) {
@@ -54,9 +58,19 @@ async function saveToMongo(image: string | undefined, env: string ) {
                return;
             }
             let date: string|null = null;
+            const cacheKey = `${name}:${version}`;
+
             try {
-               date = await getReleaseDate(name, version);
-               logger.info(`Version ${version} was released on: ${date}`);
+               // Check if the release date is already cached
+               if (cacheReleaseDates[cacheKey] !== undefined) {
+                  date = cacheReleaseDates[cacheKey];
+                  logger.info(`Using cached release date for ${name}:${version}: ${date}`);
+               } else {
+                  // Fetch the release date from GitHub and cache it
+                  date = await getReleaseDate(name, version);
+                  cacheReleaseDates[cacheKey] = date;
+                  logger.info(`Version ${version} was released on: ${date}`);
+               }
             } catch (error) {
                logErr(error, "Error getting GitHub Release info:");
             }

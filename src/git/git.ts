@@ -7,42 +7,49 @@ import {getParamStore} from "../aws/ssm.js"
 
 let ghToken: string = "";
 
+let HttpReqOptionsBase: https.RequestOptions = {
+    hostname: config.GH_API,
+    port: 443,
+    method: "GET",
+    headers: {
+        "User-Agent": config.APPLICATION_NAME,
+        "Accept":     config.GH_HEADER_ACCEPT
+    },
+    timeout: config.GH_TIMEOUT_MS,
+};
+
 async function getGitToken() {
-   try {
-      if (!ghToken) {
-         logger.info("Setting GitHub Token");
-         ghToken = isRunningInLambda() ?
-            await getParamStore(config.GH_TOKEN_PARAMSTORE_NAME):
-            getEnvironmentValue("GH_TOKEN");
-      }
-   }
-   catch(error) {
-      logErr(error, "Error setting GitHub Token:");
-   }
+    try {
+        if (!ghToken) {
+            logger.info("Setting GitHub Token");
+            ghToken = isRunningInLambda() ?
+                await getParamStore(config.GH_TOKEN_PARAMSTORE_NAME):
+                getEnvironmentValue("GH_TOKEN");
+                
+            HttpReqOptionsBase.headers!["Authorization"] = `Bearer ${ghToken}`;
+        }
+    }
+    catch(error) {
+        logErr(error, "Error setting GitHub Token:");
+    }
 }
 
 export async function getReleaseDate (
-   repo: string,
-   tag: string,
-   timeoutMs = config.GH_TIMEOUT_MS ): Promise<string | null> {
+    repo: string,
+    tag: string,
+    timeoutMs = config.GH_TIMEOUT_MS ): Promise<string | null> {
 
-   logger.info(`Retrieving GitHub Release info: repo:${repo} Release tag:${tag}`);
+    logger.info(`Retrieving GitHub Release info: repo:${repo} Release tag:${tag}`);
 
-   const url = `${config.GH_REPO_BASE}/${repo}/releases/tags/${tag}`;
+    await getGitToken();
 
-   await getGitToken();
-
-   const options = {
-       headers: {
-           "User-Agent": config.APPLICATION_NAME,
-           "Accept":     config.GH_HEADER_ACCEPT,
-           "Authorization": `Bearer ${ghToken}`
-       }
-   };
-
-   return new Promise((resolve, reject) => {
-       const req = https.get(url, options, (res) => {
-           let data = "";
+    const options = {
+        ...HttpReqOptionsBase,
+        path: `${config.GH_ENDPOINT_REPOS}/${repo}/releases/tags/${tag}`
+    };
+    return new Promise((resolve, reject) => {
+        const req = https.request(options, (res) => {
+            let data = "";
 
            res.on("data", (chunk) => {
                data += chunk;
@@ -56,21 +63,15 @@ export async function getReleaseDate (
                    reject(error);
                }
            });
-       });
+        });
 
-       req.on("error", (err) => {
+        req.on('timeout', () => {
+            req.destroy(new Error(`Request timeout [after ${timeoutMs}ms]`));
+        });
+
+        req.on("error", (err) => {
            reject(err);
-       });
-
-       // Timeout handling
-       const timeout = setTimeout(() => {
-           req.destroy(); // Abort the request
-           reject(new Error(`Request timed out after ${timeoutMs}ms`));
-       }, timeoutMs);
-
-       req.on("response", () => {
-           clearTimeout(timeout); // Cancel timeout if response is received
-       });
+        });
 
        req.end();
    });

@@ -25,7 +25,7 @@ async function getGitToken() {
             ghToken = isRunningInLambda() ?
                 await getParamStore(config.GH_TOKEN_PARAMSTORE_NAME):
                 getEnvironmentValue("GH_TOKEN");
-                
+
             HttpReqOptionsBase.headers!["Authorization"] = `Bearer ${ghToken}`;
         }
     }

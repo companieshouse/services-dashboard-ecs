@@ -65,6 +65,7 @@ async function getVersionedEnvMap(repoName: string) {
 
     for (const img of allImages) {
         const tags = img.imageTags || [];
+        console.log("Repo:", repoName, "Total images found:", allImages.length, "Tags:", tags);
 
         // All version tags
         const versionTags = tags.filter((t) => versionRegex.test(t));
@@ -103,7 +104,7 @@ async function getVersionedEnvMap(repoName: string) {
             }
         }
     }
-    // Always return all 3 keys (cidev, staging, live) initialised 
+    // Always return all 3 keys (cidev, staging, live) initialised
     return {
         ...emptyEnvVersion,
         ...toShortVersionedMap(result),

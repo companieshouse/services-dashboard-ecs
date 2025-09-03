@@ -39,7 +39,7 @@ variable "aws_region" {
 variable "lambda_runtime" {
   type        = string
   description = "The lambda runtime to use for the function"
-  default     = "nodejs20.x"
+  default     = "nodejs22.x"
 }
 variable "lambda_handler_name" {
   type        = string

@@ -102,6 +102,7 @@ resource "aws_lambda_function" "node_lambda" {
       # MONGO_COLLECTION_PROJECTS      = local.vault_secrets["mongo_collection_projects"]
       MONGO_COLLECTION_PROJECTS      = "projects.ecs"
       ENV                            = "${var.environment}"
+      ECR_REGISTRYID                 = "${var.ecr_registryId}"
     }
   }
 

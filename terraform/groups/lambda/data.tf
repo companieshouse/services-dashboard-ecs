@@ -92,13 +92,11 @@ data "aws_iam_policy_document" "ecr_operations_policy" {
       "ecr:DescribeRepositories",
       "ecr:DescribeImages",
       "ecr:ListImages",
-      "ecr:GetRepositoryPolicy",
-      "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
-      "ecr:BatchCheckLayerAvailability"
+      "ecr:GetDownloadUrlForLayer"
     ]
 
-    resources = ["*"]
+    resources = ["arn:aws:ecr:eu-west-2:416670754337:repository/*"]
   }
 }
 data "aws_vpc" "vpc" {

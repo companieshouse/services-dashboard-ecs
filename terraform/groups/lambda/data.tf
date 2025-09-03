@@ -98,6 +98,17 @@ data "aws_iam_policy_document" "ecr_operations_policy" {
 
     resources = ["arn:aws:ecr:eu-west-2:416670754337:repository/*"]
   }
+
+    statement {
+      sid     = "ECRAuthToken"
+      effect  = "Allow"
+
+      actions = [
+        "ecr:GetAuthorizationToken"
+      ]
+
+      resources = ["*"]
+  }
 }
 data "aws_vpc" "vpc" {
   filter {

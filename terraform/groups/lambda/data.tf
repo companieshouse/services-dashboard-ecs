@@ -91,7 +91,11 @@ data "aws_iam_policy_document" "ecr_operations_policy" {
     actions = [
       "ecr:DescribeRepositories",
       "ecr:DescribeImages",
-      "ecr:ListImages"
+      "ecr:ListImages",
+      "ecr:GetRepositoryPolicy",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "ecr:BatchCheckLayerAvailability"
     ]
 
     resources = ["*"]

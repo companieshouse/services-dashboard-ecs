@@ -82,6 +82,21 @@ data "aws_iam_policy_document" "ecs_operations_policy" {
   }
 }
 
+# Policy to allow Lambda to access ECR
+data "aws_iam_policy_document" "ecr_operations_policy" {
+  statement {
+    sid    = "AllowECROperations"
+    effect = "Allow"
+
+    actions = [
+      "ecr:DescribeRepositories",
+      "ecr:DescribeImages",
+      "ecr:ListImages"
+    ]
+
+    resources = ["*"]
+  }
+}
 data "aws_vpc" "vpc" {
   filter {
     name   = "tag:Name"

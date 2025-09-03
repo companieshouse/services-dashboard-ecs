@@ -35,6 +35,12 @@ variable "aws_region" {
   default     = "eu-west-2"
 }
 
+variable "ecr_registryId" {
+  type        = string
+  description = "The AWS account ID associated with the ECR registry to use."
+  default     = "416670754337"
+}
+
 
 variable "lambda_runtime" {
   type        = string

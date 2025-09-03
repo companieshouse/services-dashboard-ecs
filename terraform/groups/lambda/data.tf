@@ -96,7 +96,7 @@ data "aws_iam_policy_document" "ecr_operations_policy" {
       "ecr:GetDownloadUrlForLayer"
     ]
 
-    resources = ["arn:aws:ecr:eu-west-2:416670754337:repository/*"]
+    resources = ["arn:aws:ecr:${var.aws_region}:${var.ecr_registryId}:repository/*"]
   }
 
     statement {

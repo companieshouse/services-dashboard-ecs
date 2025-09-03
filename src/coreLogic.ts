@@ -54,7 +54,8 @@ async function getVersionedEnvMap(repoName: string) {
     do {
         const cmd: DescribeImagesCommand = new DescribeImagesCommand({
         repositoryName: repoName,
-        nextToken,
+        registryId: config.ECR_REGISTRYID,
+        nextToken
         });
         const res = await client.send(cmd);
         allImages.push(...(res.imageDetails || []));

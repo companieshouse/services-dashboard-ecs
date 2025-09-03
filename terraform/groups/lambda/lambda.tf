@@ -64,6 +64,18 @@ resource "aws_iam_role_policy_attachment" "ecs_operations_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
 }
 
+# Create a policy to allow Lambda to access ECR
+resource "aws_iam_policy" "ecr_operations_policy" {
+  name   = "${local.lambda_function_name}-ecr-operations-policy"
+  policy = data.aws_iam_policy_document.ecr_operations_policy.json
+}
+
+# Attach the ECR access policy to the Lambda execution role
+resource "aws_iam_role_policy_attachment" "ecr_operations_policy_attachment" {
+  role = aws_iam_role.lambda_execution_role.name
+  policy_arn = aws_iam_policy.ecr_operations_policy.arn
+}
+
 # Create the Lambda function
 resource "aws_lambda_function" "node_lambda" {
   depends_on = [aws_cloudwatch_log_group.lambda_log_group, aws_vpc_endpoint.ecs]

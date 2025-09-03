@@ -21,13 +21,14 @@
   "license": "MIT",
   "homepage": "https://github.com/companieshouse/services-dashboard-ecs#readme",
   "dependencies": {
+    "@aws-sdk/client-ecr": "^3.879.0",
     "@aws-sdk/client-ecs": "^3.637.0",
     "@aws-sdk/client-ssm": "^3.738.0",
     "@companieshouse/structured-logging-node": "^2.0.1",
-    "@types/mongodb": "^4.0.6",
-    "@types/node": "^22.9.1",
     "@types/aws-lambda": "^8.10.147",
     "@types/express": "^4.17.21",
+    "@types/mongodb": "^4.0.6",
+    "@types/node": "^22.9.1",
     "mongodb": "^6.9.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"

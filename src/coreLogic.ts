@@ -1,5 +1,7 @@
 import * as config from "./config/index.js";
 import * as mongo from "./mongo/mongo.js";
+import type { GitReleasesMap } from "./mongo/mongo";
+import {getReleaseDate} from "./git/git.js";
 import {logger, logErr} from "./utils/logger.js";
 import pLimit from "p-limit";
 import { ECRClient, DescribeImagesCommand } from "@aws-sdk/client-ecr";
@@ -9,44 +11,65 @@ const environments = ["cidev", "staging", "live"];
 // Regex to match semantic-version tags (ex "153.2.17")
 const versionRegex = /^[0-9]+\.[0-9]+\.[0-9]+$/;
 
-// Regex to match timestamps like yyyy-mm-dd_hh-mm-ss (and capture groups)
-const timestampRegex = /(\d{4})[^\d](\d{2})[^\d](\d{2})[^\d](\d{2})[^\d](\d{2})[^\d](\d{2})/;
+// Regex to match Deploy timestamps like yyyy-mm-dd_hh-mm-ss (and capture groups)
+const deployTimeRegex = /(\d{4})[^\d](\d{2})[^\d](\d{2})[^\d](\d{2})[^\d](\d{2})[^\d](\d{2})/;
 
 const client = new ECRClient({ region: config.REGION });
 /* ────────────────────────────────────────────────────────────────────────── */
 
-type VersionedMap = {
+type ImageEnvsVersionMap = {
     [env: string]: {
         version: string;
-        timestamp?: Date;
+        deployTime?: Date;
+        gitReleaseDate: Date | null;
     };
 };
 
-// type VersionedMap with "timestamp" removed
-type ShortVersionedMap = {
-  [env: string]: string;
+// type ImageEnvsVersionMap with "deployTime" removed
+type ImageEnvsVersionShortMap = {
+  [env: string]: {
+        version: string;
+        gitReleaseDate: Date | null;
+    };
 };
 
-const emptyEnvVersion: ShortVersionedMap = {
-  cidev: "",
-  staging: "",
-  live: "",
+const EmptyEnvs: ImageEnvsVersionShortMap = {
+  cidev: {
+    version: "",
+    gitReleaseDate: null,
+  },
+  staging: {
+    version: "",
+    gitReleaseDate: null,
+  },
+  live: {
+    version: "",
+    gitReleaseDate: null,
+  },
 };
+
+
+let gitReleasesOld: GitReleasesMap = {}; // previously fetched from Mongo
+let gitReleasesNew: GitReleasesMap = {}; // to be saved to Mongo (new/updated entries only: If I keep using the old one, old data are never dismsissed)
 
 /**
- * strip "timestamp" and assign version's value directly to the map key's value
- * @param {VersionedMap} map - Versioned map with timestamps
+ * strip "deployTimes"
+ * @param {ImageEnvsVersionMap} map - Versioned map with deployTimes
  */
-function toShortVersionedMap(map: VersionedMap): ShortVersionedMap {
-  return Object.fromEntries(
-    Object.entries(map).map(([env, { version }]) => [env, version])
-  );
+function toImageEnvsVersionShortMap(map: ImageEnvsVersionMap): ImageEnvsVersionShortMap {
+    return Object.fromEntries(
+        Object.entries(map).map(([env, { version, gitReleaseDate }]) => [
+        env,
+        { version, gitReleaseDate },
+        ])
+    );
 }
+
 /**
  * Get env -> version map from ECR
  * @param {string} repoName - ECR repository name
  */
-async function getVersionedEnvMap(repoName: string) {
+async function getVersionedEnvMap(repoName: string): Promise<ImageEnvsVersionShortMap> {
     let nextToken = undefined;
     const allImages = [];
 
@@ -62,7 +85,7 @@ async function getVersionedEnvMap(repoName: string) {
         nextToken = res.nextToken;
     } while (nextToken);
 
-    const result: VersionedMap = {}
+    const result: ImageEnvsVersionMap = {}
 
     for (const img of allImages) {
         const tags = img.imageTags || [];
@@ -80,26 +103,26 @@ async function getVersionedEnvMap(repoName: string) {
             if (!envTag) continue;
 
             // Extract timestamp from env tag if present
-            const match = envTag.match(timestampRegex);
-            let timestamp = undefined;
+            const match = envTag.match(deployTimeRegex);
+            let deployTime = undefined;
 
             if (match) { // Convert "yyyy-mm-dd_hh-mm-ss" string into Date for comparison
                 const isoLike = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`;
-                timestamp = new Date(isoLike);
+                deployTime = new Date(isoLike);
             }
             for (const version of versionTags) {
                 const existing = result[env];
                 if (!existing) {
-                    result[env] = { version, timestamp };
+                    result[env] = { version, deployTime, gitReleaseDate: null };
                 } else {
-                    // Compare timestamps if both exist
-                    if (timestamp && existing.timestamp) {
-                        if (timestamp > existing.timestamp) {
-                            result[env] = { version, timestamp };
+                    // Compare deployTimes if both exist
+                    if (deployTime && existing.deployTime) {
+                        if (deployTime > existing.deployTime) {
+                            result[env] = { version, deployTime, gitReleaseDate: null };
                         }
-                    } else if (timestamp && !existing.timestamp) {
-                        // prefer timestamped over non-timestamped
-                        result[env] = { version, timestamp };
+                    } else if (deployTime && !existing.deployTime) {
+                        // prefer deployTime-ed over non-deployTime-ed
+                        result[env] = { version, deployTime, gitReleaseDate: null };
                     }
                 }
             }
@@ -107,19 +130,46 @@ async function getVersionedEnvMap(repoName: string) {
     }
     // Always return all 3 keys (cidev, staging, live) initialised
     return {
-        ...emptyEnvVersion,
-        ...toShortVersionedMap(result),
+        ...EmptyEnvs,
+        ...toImageEnvsVersionShortMap(result),
     };
 }
 
+/**
+ * Add the git release dates to the environment map
+ */
+async function setGitReleaseDates(envMap: ImageEnvsVersionShortMap, service: string) {
+    // Add entry for the service if it doesn't exist
+    if (!gitReleasesOld[service]) {
+        gitReleasesOld[service] = {};
+    }
+    if (!gitReleasesNew[service]) {
+        gitReleasesNew[service] = {};
+    }
+    for (const entry of Object.values(envMap)) {
+        if (entry.version){
+            // If we don't have a release date, fetch and store it
+            if (!gitReleasesOld[service][entry.version]) {
+                entry.gitReleaseDate = await getReleaseDate(service, entry.version);
+                gitReleasesOld[service][entry.version] = entry.gitReleaseDate;
+            } else {
+                entry.gitReleaseDate = gitReleasesOld[service][entry.version];
+            }
+            gitReleasesNew[service][entry.version] = entry.gitReleaseDate;
+        }
+    }
+}
 /**
  * Get the list of docs and overwrite/add an "ecs" field with the tags from ECR
  */
 async function updateECSMongoWithECR() {
   await mongo.init();
 
+  gitReleasesOld = await mongo.fetchGitReleases();
+  console.log("Fetched git releases data for services:", gitReleasesOld);
+
   // 1. Get all documents
-  const docs = await mongo.getList();
+  const docs = await mongo.getServicesList();
 
   // 2. try to avoid rate limit threshold (& cap concurrency) for ECR API calls
   const limit = pLimit(5);
@@ -132,19 +182,22 @@ async function updateECSMongoWithECR() {
       limit(async () => {
         try {
           const envMap = await getVersionedEnvMap(doc.name);
+          await setGitReleaseDates(envMap, doc.name);
           ecsMap.set(doc.name, envMap);
         } catch (err) {
           logErr(err, `Failed to fetch ECR data for repo ${doc.name}:`);
-          ecsMap.set(doc.name, emptyEnvVersion);
+          ecsMap.set(doc.name, EmptyEnvs);
         }
       })
     )
   );
   // 4. Write ECS info
   await mongo.writeECSinfo(docs, ecsMap);
+  // 5. Save Git release dates
+  await mongo.saveGitReleases(gitReleasesNew);
 
   mongo.close();
   logger.info("Complete");
 }
 
-export { ShortVersionedMap, updateECSMongoWithECR };
+export { ImageEnvsVersionShortMap, updateECSMongoWithECR };

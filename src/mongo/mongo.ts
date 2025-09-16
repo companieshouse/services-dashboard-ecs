@@ -1,18 +1,24 @@
-import { Collection, Db, MongoClient, PushOperator } from "mongodb";
+import { Collection, Db, MongoClient, ObjectId, ClientSession } from "mongodb";
 
 import { getEnvironmentValue, isRunningInLambda } from "../utils/envUtils.js";
 import * as config from "../config/index.js";
 import {logger, logErr} from "../utils/logger.js";
 import {getParamStore} from "../aws/ssm.js"
-import {ShortVersionedMap} from "../coreLogic.js"
+import {ImageEnvsVersionShortMap} from "../coreLogic.js"
 
 let mongoClient: MongoClient;
 
 let database: Db;
-let collection: Collection
+let collectionProject: Collection
+let collectionConfig: Collection
+let mongoSession: ClientSession;
 
-// cache release dates already retrieved from GitHub (ex. eric is looked-up many times)
-const cacheReleaseDates: Record<string, string | null> = {};
+// Define GitReleasesMap type
+export type GitReleasesMap = {
+  [service: string]: {
+    [version: string]: Date | null;
+  };
+};
 
 /**
  * Init MongoDB connection
@@ -30,7 +36,10 @@ async function init() {
       }
       await mongoClient.connect();
       database = mongoClient.db(config.MONGO_DB_NAME);
-      collection = database.collection(config.MONGO_COLLECTION_PROJECTS);
+      collectionProject = database.collection(config.MONGO_COLLECTION_PROJECTS);
+      collectionConfig = database.collection(config.MONGO_COLLECTION_CONFIG!);
+
+      mongoSession = mongoClient.startSession();
    }
    catch(error) {
       logErr(error, "Error connecting to Mongo:");
@@ -40,21 +49,27 @@ async function init() {
 /**
  * Close MongoDB connection
  */
-function close() {
-   mongoClient.close();
+async function close() {
+   try {
+      await mongoSession.endSession();
+      await mongoClient.close();
+      logger.info("Mongo connection closed.");
+   } catch (error) {
+      logger.error(`Error closing Mongo connection: ${(error as Error).message}`);
+   }
 }
 
 /**
  * Get the list of docs (mainly just the "name")
  */
-async function getList () {
-   return await collection.find({}, { projection: { _id: 1, name: 1 } }).toArray();
+async function getServicesList () {
+   return await collectionProject.find({}, { projection: { _id: 1, name: 1 } }).toArray();
 }
 
 /**
  * Add the "ecs" field (across the whole collection as bulk operation)
  */
-async function writeECSinfo (docs: any[], ecsMap: Map<string, ShortVersionedMap>) {
+async function writeECSinfo (docs: any[], ecsMap: Map<string, ImageEnvsVersionShortMap>) {
   // Build bulk updates
   const bulkOps = docs.map((doc) => ({
     updateOne: {
@@ -64,9 +79,37 @@ async function writeECSinfo (docs: any[], ecsMap: Map<string, ShortVersionedMap>
   }));
 
   if (bulkOps.length > 0) {
-    const res = await collection.bulkWrite(bulkOps);
+    const res = await collectionProject.bulkWrite(bulkOps);
     logger.info(`Updated ${res.modifiedCount} documents with ecs field`);
   }
 }
 
-export { init, close, getList, writeECSinfo };
+async function fetchGitReleases(): Promise<GitReleasesMap> {
+   try {
+      const doc = await collectionConfig.findOne(
+         { _id: config.MONGO_CONFIG_SINGLETON as any },
+         { projection: { gitReleases: 1, _id: 0 }, session: mongoSession }
+      );
+      logger.info("Git releases data fetched successfully.");
+      return doc?.gitReleases ?? {};
+
+   } catch (error) {
+      logErr(error, "Error fetching Releases Data:");
+      return {};
+   }
+}
+
+async function saveGitReleases(gitReleases: GitReleasesMap) {
+   try {
+      await collectionConfig.updateOne(
+         { _id: config.MONGO_CONFIG_SINGLETON as any },
+         { $set: { gitReleases } },
+         { session: mongoSession }
+      );
+    logger.info("Git releases data saved successfully.");
+   } catch (error) {
+      logErr(error, "Error Updating Releases Data:");
+   }
+}
+
+export { init, close, getServicesList, writeECSinfo, fetchGitReleases, saveGitReleases };

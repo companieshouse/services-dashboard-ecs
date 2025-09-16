@@ -89,7 +89,7 @@ async function getVersionedEnvMap(repoName: string): Promise<ImageEnvsVersionSho
 
     for (const img of allImages) {
         const tags = img.imageTags || [];
-        console.log("Repo:", repoName, "Total images found:", allImages.length, "Tags:", tags);
+        logger.info(`Repo: ${repoName}, Total images found: ${allImages.length}, Tags: ${tags}`);
 
         // All version tags
         const versionTags = tags.filter((t) => versionRegex.test(t));
@@ -166,7 +166,7 @@ async function updateECSMongoWithECR() {
   await mongo.init();
 
   gitReleasesOld = await mongo.fetchGitReleases();
-  console.log("Fetched git releases data for services:", gitReleasesOld);
+  logger.info("Fetched git releases data for services.");
 
   // 1. Get all documents
   const docs = await mongo.getServicesList();

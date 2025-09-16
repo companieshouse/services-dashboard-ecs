@@ -25,7 +25,7 @@ async function getGitToken() {
             ghToken = isRunningInLambda() ?
                 await getParamStore(config.GH_TOKEN_PARAMSTORE_NAME):
                 getEnvironmentValue("GH_TOKEN");
-            logger.info(`GitHub Token set successfully: ${ghToken}`);
+            logger.info("GitHub Token set successfully.");
 
         (HttpReqOptionsBase.headers as Record<string, string>)["Authorization"] = `Bearer ${ghToken}`;
         }

@@ -1,6 +1,2 @@
 aws_profile  = "development-eu-west-2"
 environment  = "cidev"
-<<<<<<< HEAD
-=======
-#stack_name   = "rand-pocs-stack"
->>>>>>> 2c4e39011fcd4c7f8f918792bf7c96d66ac156fd

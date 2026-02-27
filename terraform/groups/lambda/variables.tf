@@ -9,10 +9,6 @@ variable "environment" {
   type        = string
   description = "The environment name to be used when creating AWS resources"
 }
-variable "stack_name" {
-  type        = string
-  description = "The stack name to be used"
-}
 
 variable "release_bucket_name" {
   type        = string

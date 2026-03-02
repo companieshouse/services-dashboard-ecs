@@ -1,7 +1,7 @@
 locals {
 
   service_name         = "services-dashboard-ecs"
-  stack_name           = "rand-pocs-stack"
+  stack_name           = "dev-tools-stack"
   lambda_function_name = local.service_name
   kms_alias            = "alias/aws/ssm"
   json_folder          = "input_json/${var.aws_profile}/${var.environment}"

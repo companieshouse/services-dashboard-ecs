@@ -1,3 +1,2 @@
 aws_profile  = "staging-eu-west-2"
 environment  = "staging"
-stack_name   = "rand-stack"

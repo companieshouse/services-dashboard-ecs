@@ -4,7 +4,7 @@ import type { GitReleasesMap } from "./mongo/mongo";
 import {getReleaseDate} from "./git/git.js";
 import {logger, logErr} from "./utils/logger.js";
 import pLimit from "p-limit";
-import { ECRClient, DescribeImagesCommand, ImageDetail } from "@aws-sdk/client-ecr";
+import { ECRClient, DescribeImagesCommand } from "@aws-sdk/client-ecr";
 import calculateImageEnvVersionMap, { ImageEnvsVersionMap } from "./utils/calculateImageEnvVersionMap.js";
 
 const client = new ECRClient({ region: config.REGION });

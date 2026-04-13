@@ -1,5 +1,5 @@
 import { createLogger } from "@companieshouse/structured-logging-node";
-import { APPLICATION_NAME } from "../config/index.js";
+import { APPLICATION_NAME } from "../config/index";
 
 const logger = createLogger(APPLICATION_NAME);
 

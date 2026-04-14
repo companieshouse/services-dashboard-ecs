@@ -23,4 +23,7 @@ export default {
     "^.+\\.ts$": ["ts-jest", { diagnostics: false }]
   },
   globalSetup: "./test/setup.ts",
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
 };

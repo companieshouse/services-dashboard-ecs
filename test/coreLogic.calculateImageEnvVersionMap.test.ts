@@ -1,4 +1,4 @@
-import calculateImageEnvVersionMap, { calculateDeployTimeFromTag, findBestMatchingEnvironmentTag } from '../src/utils/calculateImageEnvVersionMap';
+import calculateImageEnvVersionMap, { calculateDeployTimeFromTag } from '../src/utils/calculateImageEnvVersionMap';
 
 jest.mock('../src/utils/logger');
 

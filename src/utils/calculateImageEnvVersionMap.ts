@@ -23,7 +23,7 @@ export function calculateDeployTimeFromTag(envTag: string): Date | undefined {
     const match = envTag.match(deployTimeRegex);
 
     if (match) { // Convert "yyyy-mm-dd_hh-mm-ss" string into Date for comparison
-        const isoLike = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`;
+        const isoLike = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}Z`;
         return new Date(isoLike);
     }
 

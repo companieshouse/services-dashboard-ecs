@@ -1,5 +1,5 @@
 import { ImageDetail } from "@aws-sdk/client-ecr";
-import { logger } from "./logger";
+import { logger } from "./logger.js";
 
 // Regex to match semantic-version tags (ex "153.2.17")
 const versionRegex = /^[0-9]+\.[0-9]+\.[0-9]+$/;

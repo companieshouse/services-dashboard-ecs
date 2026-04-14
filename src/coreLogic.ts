@@ -1,6 +1,6 @@
 import * as config from "./config/index.js";
 import * as mongo from "./mongo/mongo.js";
-import type { GitReleasesMap } from "./mongo/mongo";
+import type { GitReleasesMap } from "./mongo/mongo.js";
 import {getReleaseDate} from "./git/git.js";
 import {logger, logErr} from "./utils/logger.js";
 import pLimit from "p-limit";

@@ -1,6 +1,6 @@
-import { getEnvironmentValue } from "../utils/envUtils";
+import { getEnvironmentValue } from "../utils/envUtils.js";
 
-export const APPLICATION_NAME= "services-dashboard-ecs";
+export const APPLICATION_NAME = "services-dashboard-ecs";
 
 // MongoDB configuration
 export const MONGO_PROTOCOL = getEnvironmentValue("MONGO_PROTOCOL", "mongodb");

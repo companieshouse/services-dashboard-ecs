@@ -9,7 +9,7 @@
     "prebuild": "rm -rf ./lib",
     "build": "tsc",
     "test": "jest",
-    "coverage": "jest --coverage --forceExit --passWithNoTests"
+    "coverage": "jest --coverage --forceExit --passWithNoTests --coverageProvider=v8"
   },
   "keywords": [],
   "description": "ECS-info-gathering lambda for services dashboard",

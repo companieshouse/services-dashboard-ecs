@@ -1,4 +1,4 @@
-import { getEnvironmentValue } from "../utils/envUtils.js";
+import { getEnvironmentValue } from "../utils/envUtils";
 
 export const APPLICATION_NAME= "services-dashboard-ecs";
 

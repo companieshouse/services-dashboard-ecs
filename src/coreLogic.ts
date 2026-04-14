@@ -5,25 +5,10 @@ import {getReleaseDate} from "./git/git.js";
 import {logger, logErr} from "./utils/logger.js";
 import pLimit from "p-limit";
 import { ECRClient, DescribeImagesCommand } from "@aws-sdk/client-ecr";
-
-/* ─── configuration ──────────────────────────────────────────────────────── */
-const environments = ["cidev", "staging", "live"];
-// Regex to match semantic-version tags (ex "153.2.17")
-const versionRegex = /^[0-9]+\.[0-9]+\.[0-9]+$/;
-
-// Regex to match Deploy timestamps like yyyy-mm-dd_hh-mm-ss (and capture groups)
-const deployTimeRegex = /(\d{4})[^\d](\d{2})[^\d](\d{2})[^\d](\d{2})[^\d](\d{2})[^\d](\d{2})/;
+import calculateImageEnvVersionMap, { ImageEnvsVersionMap } from "./utils/calculateImageEnvVersionMap.js";
 
 const client = new ECRClient({ region: config.REGION });
 /* ────────────────────────────────────────────────────────────────────────── */
-
-type ImageEnvsVersionMap = {
-    [env: string]: {
-        version: string;
-        deployTime?: Date;
-        gitReleaseDate: Date | null;
-    };
-};
 
 // type ImageEnvsVersionMap with "deployTime" removed
 type ImageEnvsVersionShortMap = {
@@ -65,6 +50,8 @@ function toImageEnvsVersionShortMap(map: ImageEnvsVersionMap): ImageEnvsVersionS
     );
 }
 
+
+
 /**
  * Get env -> version map from ECR
  * @param {string} repoName - ECR repository name
@@ -85,49 +72,8 @@ async function getVersionedEnvMap(repoName: string): Promise<ImageEnvsVersionSho
         nextToken = res.nextToken;
     } while (nextToken);
 
-    const result: ImageEnvsVersionMap = {}
+    const result: ImageEnvsVersionMap = calculateImageEnvVersionMap(allImages, repoName);
 
-    for (const img of allImages) {
-        const tags = img.imageTags || [];
-        logger.info(`Repo: ${repoName}, Total images found: ${allImages.length}, Tags: ${tags}`);
-
-        // All version tags
-        const versionTags = tags.filter((t) => versionRegex.test(t));
-        if (versionTags.length === 0) continue;
-
-        for (const env of environments) {
-            // Look for env tag (case-insensitive)
-            const envTag = tags.find((t) =>
-                t.toLowerCase().includes(env.toLowerCase())
-            );
-            if (!envTag) continue;
-
-            // Extract timestamp from env tag if present
-            const match = envTag.match(deployTimeRegex);
-            let deployTime = undefined;
-
-            if (match) { // Convert "yyyy-mm-dd_hh-mm-ss" string into Date for comparison
-                const isoLike = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`;
-                deployTime = new Date(isoLike);
-            }
-            for (const version of versionTags) {
-                const existing = result[env];
-                if (!existing) {
-                    result[env] = { version, deployTime, gitReleaseDate: null };
-                } else {
-                    // Compare deployTimes if both exist
-                    if (deployTime && existing.deployTime) {
-                        if (deployTime > existing.deployTime) {
-                            result[env] = { version, deployTime, gitReleaseDate: null };
-                        }
-                    } else if (deployTime && !existing.deployTime) {
-                        // prefer deployTime-ed over non-deployTime-ed
-                        result[env] = { version, deployTime, gitReleaseDate: null };
-                    }
-                }
-            }
-        }
-    }
     // Always return all 3 keys (cidev, staging, live) initialised
     return {
         ...EmptyEnvs,

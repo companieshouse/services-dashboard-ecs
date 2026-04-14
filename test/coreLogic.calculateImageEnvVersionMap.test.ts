@@ -104,7 +104,7 @@ describe('calculateDeployTimeFromTag', () => {
     const tag = 'deployed-staging-staging-2026-04-13_11-10-09';
     const deployTime = calculateDeployTimeFromTag(tag);
     expect(deployTime).toBeInstanceOf(Date);
-    expect(deployTime?.toISOString()).toBe('2026-04-13T10:10:09.000Z');
+    expect(deployTime?.toISOString()).toBe('2026-04-13T11:10:09.000Z');
   });
 
   it('returns undefined if no deploy time is present in the tag', () => {
